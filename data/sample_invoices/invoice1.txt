@@ -1,0 +1,14 @@
+Supplier: SteelCo
+Item: Hot rolled steel coil
+Qty: 5000 kg
+Amount: 10000 USD
+
+Supplier: ShipFast Logistics
+Service: Road freight by truck
+Weight: 20 tons
+Distance: 1000 km
+Amount: 8000 USD
+
+Packaging Materials
+Qty: 200 kg
+Amount: 500 USD

@@ -1,0 +1,6 @@
+{
+  "steel_per_kg": 2.0,
+  "packaging_per_kg": 1.5,
+  "transport_per_tkm": 0.06,
+  "other_per_usd": 0.4
+}
