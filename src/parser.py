@@ -1,6 +1,8 @@
 import re
 from typing import Dict, List
 
+from .llm_client import LLMClientError, extract_invoice_items
+
 
 def _extract_supplier(lines: List[str]) -> str:
     for line in lines:
@@ -22,7 +24,23 @@ def _clean_amount(raw: str) -> float:
 
 def parse_invoice_text(text: str) -> List[Dict]:
     """
-    Very lightweight rule-based parser that tries to extract items from invoice text.
+    Try to parse invoice text with the LLM first; fall back to heuristics if unavailable or failing.
+    """
+    try:
+        items = extract_invoice_items(text)
+        if items:
+            return items
+    except LLMClientError as exc:
+        print(f"[parse_invoice_text] LLM extraction failed, falling back to rules: {exc}")
+    except Exception as exc:  # defensive catch-all so pipeline always continues
+        print(f"[parse_invoice_text] Unexpected LLM error, falling back to rules: {exc}")
+
+    return _parse_with_rules(text)
+
+
+def _parse_with_rules(text: str) -> List[Dict]:
+    """
+    Lightweight rule-based parser that tries to extract items from invoice text.
     Each detected line with quantities or monetary amounts becomes an item.
     """
     lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
@@ -72,3 +90,4 @@ def parse_invoice_text(text: str) -> List[Dict]:
         items.append({"supplier": supplier, "description": lines[0] if lines else "Unknown item"})
 
     return items
+
