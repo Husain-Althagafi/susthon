@@ -1,7 +1,7 @@
 import re
 from typing import Dict, List
 
-from .llm_client import LLMClientError, extract_invoice_items
+from .llm_client import LLMClientError, LLMNoItemsError, extract_invoice_items
 
 
 def _extract_supplier(lines: List[str]) -> str:
@@ -30,6 +30,11 @@ def parse_invoice_text(text: str) -> List[Dict]:
         items = extract_invoice_items(text)
         if items:
             return items
+        return []
+    except LLMNoItemsError as exc:
+        # Explicitly respect the "no items found" signal; do not fall back to heuristics.
+        print(f"[parse_invoice_text] LLM returned no items: {exc}")
+        return []
     except LLMClientError as exc:
         print(f"[parse_invoice_text] LLM extraction failed, falling back to rules: {exc}")
     except Exception as exc:  # defensive catch-all so pipeline always continues
@@ -90,4 +95,3 @@ def _parse_with_rules(text: str) -> List[Dict]:
         items.append({"supplier": supplier, "description": lines[0] if lines else "Unknown item"})
 
     return items
-

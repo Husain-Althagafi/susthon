@@ -17,6 +17,10 @@ class LLMClientError(Exception):
     pass
 
 
+class LLMNoItemsError(LLMClientError):
+    """Raised when the LLM succeeds but returns no usable items."""
+
+
 def _post_to_llm(payload: Dict[str, Any]) -> Dict[str, Any]:
     if not API_KEY:
         raise LLMClientError("Missing GEMINI_API_KEY environment variable.")
@@ -129,6 +133,6 @@ def extract_invoice_items(invoice_text: str) -> List[Dict]:
 
     normalized_items = [item for item in (_normalize_item(entry) for entry in items_payload) if item]
     if not normalized_items:
-        raise LLMClientError("LLM did not return any usable items.")
+        raise LLMNoItemsError("LLM did not return any usable items.")
 
     return normalized_items
